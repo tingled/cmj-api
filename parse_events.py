@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from dateutil import parser as dateparser
-import pymongo
+from pymongo import MongoClient
+from hashlib import md5
 import sunburnt
 import requests
 import ignore
@@ -52,16 +53,17 @@ def parse_row(row,date):
     if event_type:
         data['event_type'] = event_type[0]
 
-    match = re.search('<a href="(?P<url>.*?)".*?>(?P<name>.*?) <span class=\'vs\'>(?P<venue>.*?)</span>',row)
+    match = re.search('<a href="(?P<url>.*?)".*?>(?P<name>.*?) <span class=\'vs\'>(?P<venue>.*?)</span>',row,re.DOTALL)
     if match:
         m = match.groupdict()
         data['url'] = "%s%s" % (base_url,m['url'])
         data['name'] = m['name']
         data['venue'] = m['venue']
 
+        
     description = re.search('<div class="sched-description">(?P<description>.*?)</div',row)
     if description:
-        data['description'] = description
+        data['description'] = description.groups()[0]
 
     roles = re.search('<em class="sched-role-list">(?P<role>.*?)</em>',row)
 
@@ -96,7 +98,11 @@ def get_metadata(artist_name):
               'limit':1}
               
     resp = requests.get(url,params = params)
+    if not resp.ok:
+        return {}
+    
     json = resp.json()['response'][0]
+        
     if json['score'] < 0.9:
         return {}
 
@@ -117,11 +123,34 @@ def solr_dict(d):
 
     return newd
 
-if __name__ == "__main__":
-    shows = get_shows()
-    for show in shows:
-        md = get_metadata(show['name'])
-        data = dict(md,**show)
-        search_data = solr_dict(data)
+def get_solr_conn():
+    return sunburnt.SolrInterface(ignore.solr_url)
 
+def get_mongo_db():
+    client = MongoClient(ignore.mongo_host,27017)
+    db = client['cmj']
+    return db
+
+def gen_mongo_id():
+    return md5(datetime.now().isoformat()).hexdigest()
+
+if __name__ == "__main__":
+    db = get_mongo_db()
+    solr = get_solr_conn()
+
+    shows = get_shows()
+    try:
+        for show in shows:
+            md = get_metadata(show['name'])
+            data = dict(md,**show)
+            search_data = solr_dict(data)
+
+            mongo_id = gen_mongo_id()
+            data['_id'] = mongo_id
+            search_data['id'] = mongo_id
+
+            db.shows.insert(data)
+            solr.add(search_data)
+    except Exception as e:
         pdb.set_trace()
+    solr.commit()
