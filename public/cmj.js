@@ -13,16 +13,7 @@ map.scrollWheelZoom.disable();
 $(function() {
 
   $('#genreFilter').change(function(evt) {
-    var date = $('#dateFilter').val();
-    var genre = $('#genreFilter').val();
-    var criteria = {};
-    if (date) {
-      criteria.date = date;
-    }
-    if (genre) {
-      criteria.genre1 = genre;
-    }
-    getShows(criteria);
+    getShows();
   });
 
   $('#dateFilter').change(function(evt) {
@@ -35,7 +26,7 @@ $(function() {
     if (genre) {
       criteria.genre1 = genre;
     }
-    getShows(criteria);
+    getShows();
   });
 
   var showsHTML = function(shows) {
@@ -75,7 +66,7 @@ $(function() {
     markerLayer.eachLayer(function(layer) {
       var html = "<div>";
       html = "<strong>" + layer.feature.properties.title + "</strong>";
-      var link = "<a target=_blank href='http://embed.spotify.com/?uri=spotify:trackset:name:" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
+      var link = "<a class='venuePlaylist' target=_blank href='http://embed.spotify.com/?uri=spotify:trackset:name:" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
       html += link;
       html += layer.feature.properties.popup;
       html += "</div>";
@@ -91,7 +82,16 @@ $(function() {
     });
   };
 
-  var getShows = function(criteria) {
+  var getShows = function() {
+    var date = $('#dateFilter').val();
+    var genre = $('#genreFilter').val();
+    var criteria = {};
+    if (date) {
+      criteria.date = date;
+    }
+    if (genre) {
+      criteria.genre1 = genre;
+    }
     clearMarkers();
     var url = '/shows';
     if (criteria) {
@@ -104,4 +104,6 @@ $(function() {
       });
     });
   }
+
+  getShows();
 });
