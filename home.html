@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+  <script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
+  <link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.css' rel='stylesheet' />
+  <script src='lodash.min.js'></script>
+  <script src='jquery.js'></script>
+  <!--[if lte IE 8]>
+    <link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.ie.css' rel='stylesheet' >
+  <![endif]-->
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+  </style>
+</head>
+<body>
+  <div>
+    <select>
+      <option value="16">16</option>
+    </select>
+
+  </div>
+<div id='map'></div>
+<script type='text/javascript'>
+var map = L.mapbox.map('map', 'derektingle.map-07s27o18');
+
+$(function() {
+  var addVenue = function(venue) {
+    alert(L);
+    L.mapbox.markerLayer({
+      // this feature is in the GeoJSON format: see geojson.org
+      // for the full specification
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        // coordinates here are in longitude, latitude order because
+        // x, y is the standard for GeoJSON and many formats
+        coordinates: [venue.lng, venue.lat]
+      },
+      properties: {
+        title: venue.name,
+        description: venue.name,
+        // one can customize markers by adding simplestyle properties
+        // http://mapbox.com/developers/simplestyle/
+        'marker-size': 'medium',
+        'marker-color': '#f0a'
+      }
+    }).addTo(map);
+  };
+
+  $.get('/shows', function(data) {
+    console.log(data.venues);
+    _.forEach(data.venues, function(venue) {
+      addVenue(venue);
+    });
+  });
+});
+
+</script>
+</body>
+</html>
