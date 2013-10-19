@@ -131,12 +131,12 @@ app.get('/shows', function(request, response) {
         //console.log(show.name);
         console.log(items.length);
         tracks.find({'id':'artist:'+show.name},function(err,tl){
-          console.log('.');
+          //console.log('.');
           tcnt = 0;
 
           if ( tl[0] == undefined){
             cnt++;
-            console.log(cnt);
+            //console.log('und',cnt);
             if (cnt==items.length ){
               response.json({
                 venues : venues
@@ -148,9 +148,11 @@ app.get('/shows', function(request, response) {
             tl[0].tracks =[];
           }
 
+          cnt++;
           _.forEach(tl[0].tracks,function(track){
             tcnt++;
             venues[show.venue].tracks.push(track);
+            //console.log('...',cnt,tcnt,tracks.length);
             if (cnt==items.length && tcnt == tl[0].tracks.length){
               response.json({
                 venues :venues
@@ -158,8 +160,7 @@ app.get('/shows', function(request, response) {
               mongoose.connection.close();
             };
           });
-            cnt++;
-            console.log(cnt);
+          //console.log('fin',cnt,items.length);
         });
       });
     });
