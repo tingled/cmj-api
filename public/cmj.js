@@ -13,13 +13,29 @@ map.scrollWheelZoom.disable();
 $(function() {
 
   $('#genreFilter').change(function(evt) {
-    var genre = evt.target.value;
-    getShows({ genre1: genre });
+    var date = $('#dateFilter').val();
+    var genre = $('#genreFilter').val();
+    var criteria = {};
+    if (date) {
+      criteria.date = date;
+    }
+    if (genre) {
+      criteria.genre1 = genre;
+    }
+    getShows(criteria);
   });
 
   $('#dateFilter').change(function(evt) {
-    var date = evt.target.value;
-    getShows({ date : date });
+    var date = $('#dateFilter').val();
+    var genre = $('#genreFilter').val();
+    var criteria = {};
+    if (date) {
+      criteria.date = date;
+    }
+    if (genre) {
+      criteria.genre1 = genre;
+    }
+    getShows(criteria);
   });
 
   var showsHTML = function(shows) {
@@ -59,8 +75,7 @@ $(function() {
     markerLayer.eachLayer(function(layer) {
       var html = "<div>";
       html = "<strong>" + layer.feature.properties.title + "</strong>";
-      var link = "<a href='http://embed.spotify.com/?uri=spotify:trackset:name:" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
-      console.log(link);
+      var link = "<a target=_blank href='http://embed.spotify.com/?uri=spotify:trackset:name:" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
       html += link;
       html += layer.feature.properties.popup;
       html += "</div>";
@@ -68,17 +83,25 @@ $(function() {
     });
   };
 
+  var clearMarkers = function() {
+    map.markerLayer.clearLayers();
+    map.markerLayer.eachLayer(function(l) {
+      alert(l);
+      map.markerLayer.removeLayer(l);
+    });
+  };
+
   var getShows = function(criteria) {
-    var url = '/shows'; 
+    clearMarkers();
+    var url = '/shows';
     if (criteria) {
       url += '?' + $.param(criteria);
     }
+    console.log(url);
     $.get(url, function(data) {
       _.forEach(data.venues, function(venue) {
         addVenue(venue);
       });
     });
   }
-
-
 });
