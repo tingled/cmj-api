@@ -28,7 +28,6 @@ $(function() {
       snippet += "<tr>";
       snippet += "<td>" + show.name + "</td>";
       snippet += "<td>" + moment(show.start_time).format('ddd h:mm a') + "</td>";
-      snippet += "<td>" + "<a class='playlist' href='artist_playlist'>Playlist</a>" + "</td>";
       snippet += "</tr>";
     });
     snippet += "</table>"
@@ -49,6 +48,7 @@ $(function() {
         title: venue.name,
         description: venue.name,
         popup : showsHTML(venue.shows),
+        tracks : venue.tracks,
         // one can customize markers by adding simplestyle properties
         // http://mapbox.com/developers/simplestyle/
         'marker-size': 'medium',
@@ -59,6 +59,9 @@ $(function() {
     markerLayer.eachLayer(function(layer) {
       var html = "<div>";
       html = "<strong>" + layer.feature.properties.title + "</strong>";
+      var link = "<a href='http://embed.spotify.com/?uri=spotify:trackset:name:" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
+      console.log(link);
+      html += link;
       html += layer.feature.properties.popup;
       html += "</div>";
       layer.bindPopup(html);
@@ -76,4 +79,6 @@ $(function() {
       });
     });
   }
+
+
 });
