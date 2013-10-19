@@ -7,6 +7,7 @@ import requests
 import ignore
 import re
 import pdb
+from bs4 import BeautifulSoup as bs
 
 base_url = "http://cmj2013.sched.org"
 
@@ -235,6 +236,39 @@ def cleanup_hours():
             continue
         time = dateparser.parse(start)
         time = time - offset
-        show['date'] = time.day
+        show['date'] = str(time.day)
 
         db.shows.save(show)
+
+def get_top_tracks(artist_uri):
+    num_tracks = 5
+    
+    a_id = uri.split(':')[-1]
+    url = "http://open.spotify.com/artist/" + a_id
+    resp = requests.get(url)
+    if not resp.ok:
+        return []
+
+    soup = bs(resp.text)
+    tracks = soup.find(id='tracks')
+    links = tracks.find_all('a')
+    uris = []
+    for link in links:
+        if link['href'].startswith('/track/'):
+            uris.append(link['href'].split('/')[-1])
+        if len(uris) == num_tracks:
+            break
+    return uris
+
+def set_artist_tracks():     
+    db = get_mongo_db()
+    for show in db.shows.find({'artist_uri': {'$exists': True}}):
+        uri = show['artist_uri']
+        tracks = get_top_tracks(uri)
+        doc = {'_id':'artist:'+show['name'],'tracks':tracks}
+        db.tracks.save(doc)
+
+
+
+
+    
