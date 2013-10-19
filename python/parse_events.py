@@ -134,7 +134,7 @@ def get_mongo_db():
 def gen_mongo_id():
     return md5(datetime.now().isoformat()).hexdigest()
 
-if __name__ == "__main__":
+def populate_mongo():
     db = get_mongo_db()
     solr = get_solr_conn()
 
@@ -154,3 +154,87 @@ if __name__ == "__main__":
     except Exception as e:
         pdb.set_trace()
     solr.commit()
+
+def query_4sq(name):
+    base = "https://api.foursquare.com/v2/venues/search"
+    params = {"query":name,
+              "ll":"40.7,-74",
+              "v":"20131018",
+              "oauth_token":ignore.foursquare_key}
+    
+    resp = requests.get(base,params=params)
+    if not resp.ok:
+        return None
+
+    json = resp.json()
+    if not len(json['response']['venues']):
+        return None
+
+    return json['response']['venues'][0]['location']
+
+def shows_per_venue(venue):
+    db = get_mongo_db()
+    return list(db.shows.find({'venue':venue}))
+
+def get_lat_lng():
+    db = get_mongo_db()
+    venues = db.shows.distinct('venue')
+    no_loc_data = []
+    for venue in venues:
+        loc = query_4sq(venue)
+        if loc:
+            shows = shows_per_venue(venue)
+            for show in shows:
+                show['lat'] = loc['lat']
+                show['lng'] = loc['lng']
+                show['city'] = loc['city']
+
+                db.shows.save(show)
+        else:
+            no_loc_data.append(venue)
+
+    return
+
+def get_spotify_artist_uri(artist):
+    url = "http://ws.spotify.com/search/1/artist.json"
+    params = {'q':artist}
+    resp = requests.get(url,params=params)
+    if not resp.ok:
+        return None
+    json = resp.json()
+    if not json['artists']:
+        return None
+
+    return json['artists'][0]['href']
+
+def add_spotify_artist_uris():
+    db = get_mongo_db()
+    uris = {}
+    shows = db.shows.find()
+    for show in shows:
+        name = show['name']
+        uri = None
+        if name in uris:
+            uri = uris[name]
+        else:
+            uri = get_spotify_artist_uri(name)
+            uris[name] = uri
+
+        if uri:
+            show['artist_uri'] = uri
+            db.shows.save(show)
+
+def cleanup_hours():
+    db = get_mongo_db()
+    shows = db.shows.find()
+    offset = timedelta(hours=6)
+    
+    for show in shows:
+        start = show['start_time']
+        if not start:
+            continue
+        time = dateparser.parse(start)
+        time = time - offset
+        show['date'] = time.day
+
+        db.shows.save(show)
