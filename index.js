@@ -23,6 +23,13 @@ var showSchema = new Schema({
   'lng' : Number
 });
 
+//+ Jonas Raoni Soares Silva
+//@ http://jsfromhell.com/array/shuffle [v1.0]
+function shuffle(o){ //v1.0
+  for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+  return o;
+};
+
 var trackSchema = new Schema({
   'tracks' : [String],
   'id': String
@@ -154,6 +161,7 @@ app.get('/shows', function(request, response) {
           _.forEach(tl[0].tracks,function(track){
             tcnt++;
             venues[show.venue].tracks.push(track);
+            venues[show.venue].tracks = shuffle(venues[show.venue].tracks);
             //console.log('...',cnt,tcnt,tracks.length);
             if (cnt==items.length && tcnt == tl[0].tracks.length){
               response.json({
