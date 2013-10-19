@@ -15,41 +15,48 @@
   </style>
 </head>
 <body>
+  <div>
+    <select>
+      <option value="16">16</option>
+    </select>
+
+  </div>
 <div id='map'></div>
 <script type='text/javascript'>
 var map = L.mapbox.map('map', 'derektingle.map-07s27o18');
-alert("HI");
 
-/*
 $(function() {
-  alert('yes');
-  $.get('/shows', function(data) {
-    _.forEach(data.venues, function(venue) {
-      alert(venue);
-    });
-  });
-});
-*/
-
-L.mapbox.markerLayer({
-    // this feature is in the GeoJSON format: see geojson.org
-    // for the full specification
-    type: 'Feature',
-    geometry: {
+  var addVenue = function(venue) {
+    alert(L);
+    L.mapbox.markerLayer({
+      // this feature is in the GeoJSON format: see geojson.org
+      // for the full specification
+      type: 'Feature',
+      geometry: {
         type: 'Point',
         // coordinates here are in longitude, latitude order because
         // x, y is the standard for GeoJSON and many formats
-        coordinates: [-122, 37]
-    },
-    properties: {
-        title: 'A Single Marker',
-        description: 'Just one of me',
+        coordinates: [venue.lng, venue.lat]
+      },
+      properties: {
+        title: venue.name,
+        description: venue.name,
         // one can customize markers by adding simplestyle properties
         // http://mapbox.com/developers/simplestyle/
-        'marker-size': 'large',
+        'marker-size': 'medium',
         'marker-color': '#f0a'
-    }
-}).addTo(map);
+      }
+    }).addTo(map);
+  };
+
+  $.get('/shows', function(data) {
+    console.log(data.venues);
+    _.forEach(data.venues, function(venue) {
+      addVenue(venue);
+    });
+  });
+});
+
 </script>
 </body>
 </html>

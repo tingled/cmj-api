@@ -29,7 +29,8 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 var connect = function() {
-  connstring = "mongodb://localhost/cmj";
+  var host = 'localhost';
+  connstring = "mongodb://" + host + "/cmj";
   mongoose.connect(connstring);
 };
 
@@ -48,17 +49,20 @@ app.get('/shows', function(request, response) {
   shows.find(criteria, function(err, items) {
     _.forEach(items, function(item) {
       if (!venues[item.venue]) {
+        // Venue meta
         venues[item.venue] = { 
           name : item.venue,
           lat : item.lat,
-          lng : item.lng
+          lng : item.lng,
+          shows : []
         };
       };
+
+      venues[item.venue]
     });
 
     response.json({
-      venues : venues,
-      shows : items
+      venues : venues
     });
     mongoose.connection.close();
   });
