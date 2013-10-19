@@ -58,7 +58,7 @@ app.get('/shows', function(request, response) {
         };
       };
 
-      venues[item.venue]
+      venues[item.venue].shows.push(item);
     });
 
     response.json({
