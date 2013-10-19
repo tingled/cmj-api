@@ -22,7 +22,14 @@ var showSchema = new Schema({
   'lat' : Number,
   'lng' : Number
 });
+
+var trackSchema = new Schema({
+  'tracks' : [String],
+  'id': String
+});
+
 var shows = mongoose.model('shows', showSchema);
+var tracks = mongoose.model('tracks',trackSchema);
 
 app = express();
 app.engine('html', require('ejs').renderFile);
@@ -34,10 +41,66 @@ var connect = function() {
   mongoose.connect(connstring);
 };
 
+var showToTracks = function(show, cb){
+  mongoID = 'artist:'+show.name;
+  tracks.findById(mongoID, function(err, trackList) {
+    cb(trackList)
+  })
+};
+
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(request, response) {
   response.render(__dirname + '/home');
+});
+
+app.get('/playlist',function(request,response) {
+  connect();
+
+  trackList = [];
+  var criteria=request.query;
+  criteria.event_type = 'S';
+
+  cnt = 0
+  shows.find(criteria, function(err, items) {
+    num = items.length;
+    if (num == 0){
+      response.json({
+        tracks: trackList
+      });
+      mongoose.connection.close();
+    }
+    _.forEach(items,function(show){
+      tracks.find({'id':'artist:'+show.name},function(err,tl){
+        cnt++;
+        tcnt = 0;
+
+        if ( tl[0] == undefined){
+          if (cnt==items.length ){
+            response.json({
+              tracks: trackList
+            });
+            mongoose.connection.close();
+          };
+
+          tl[0]={};
+          tl[0].tracks =[];
+        }
+
+        _.forEach(tl[0].tracks,function(track){
+          tcnt++;
+          trackList.push(track);
+          if (cnt==items.length && tcnt == tl[0].tracks.length){
+            response.json({
+              tracks: trackList
+            });
+            mongoose.connection.close();
+          };
+        });
+
+      });
+    });
+  });
 });
 
 app.get('/shows', function(request, response) {
