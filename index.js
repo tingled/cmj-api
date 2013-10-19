@@ -36,9 +36,11 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 var connect = function() {
-  var host = 'localhost';
-  connstring = "mongodb://" + host + "/cmj";
-  mongoose.connect(connstring);
+  if (mongoose.connection.readyState === 0){
+    var host = 'localhost';
+    connstring = "mongodb://" + host + "/cmj";
+    mongoose.connect(connstring);
+  }
 };
 
 var showToTracks = function(show, cb){
