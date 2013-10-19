@@ -103,7 +103,69 @@ app.get('/playlist',function(request,response) {
   });
 });
 
+
 app.get('/shows', function(request, response) {
+  var criteria = request.query;
+  criteria.event_type = 'S';
+  var venues = {};
+
+  connect();
+  shows.find(criteria, function(err, items) {
+    cnt = 0;
+    _.forEach(items, function(item) {
+      if (!venues[item.venue]) {
+        // Venue meta
+        venues[item.venue] = { 
+          name : item.venue,
+          lat : item.lat,
+          lng : item.lng,
+          shows : [],
+          tracks : []
+        };
+      };
+      venues[item.venue].shows.push(item);
+    });
+      //console.log(items.length);
+
+      _.forEach(items,function(show){
+        //console.log(show.name);
+        console.log(items.length);
+        tracks.find({'id':'artist:'+show.name},function(err,tl){
+          console.log('.');
+          tcnt = 0;
+
+          if ( tl[0] == undefined){
+            cnt++;
+            console.log(cnt);
+            if (cnt==items.length ){
+              response.json({
+                venues : venues
+              });
+              mongoose.connection.close();
+            };
+
+            tl[0]={};
+            tl[0].tracks =[];
+          }
+
+          _.forEach(tl[0].tracks,function(track){
+            tcnt++;
+            venues[show.venue].tracks.push(track);
+            if (cnt==items.length && tcnt == tl[0].tracks.length){
+              response.json({
+                venues :venues
+              });
+              mongoose.connection.close();
+            };
+          });
+            cnt++;
+            console.log(cnt);
+        });
+      });
+    });
+  });
+
+app.get('/showsbk', function(request, response) {
   var criteria = request.query;
   criteria.event_type = 'S';
   var venues = {};
