@@ -11,6 +11,7 @@ map.scrollWheelZoom.disable();
 */
 
 $(function() {
+  var allLayers = []
 
   $('#genreFilter').change(function(evt) {
     getShows();
@@ -40,6 +41,7 @@ $(function() {
     snippet += "</table>"
     return snippet;
   }
+
   var addVenue = function(venue) {
     var markerLayer = L.mapbox.markerLayer({
       // this feature is in the GeoJSON format: see geojson.org
@@ -72,17 +74,21 @@ $(function() {
       html += "</div>";
       layer.bindPopup(html);
     });
+
+    allLayers.push(markerLayer);
   };
 
   var clearMarkers = function() {
-    map.markerLayer.clearLayers();
-    map.markerLayer.eachLayer(function(l) {
-      alert(l);
-      map.markerLayer.removeLayer(l);
+    _.forEach(allLayers, function(layer) {
+      layer.clearLayers();
+      layer.eachLayer(function(l) {
+        map.markerLayer.removeLayer(l);
+      });
     });
   };
 
   var getShows = function() {
+    clearMarkers();
     var date = $('#dateFilter').val();
     var genre = $('#genreFilter').val();
     var criteria = {};
@@ -92,7 +98,6 @@ $(function() {
     if (genre) {
       criteria.genre1 = genre;
     }
-    clearMarkers();
     var url = '/shows';
     if (criteria) {
       url += '?' + $.param(criteria);
@@ -102,6 +107,7 @@ $(function() {
       _.forEach(data.venues, function(venue) {
         addVenue(venue);
       });
+
     });
   }
 
