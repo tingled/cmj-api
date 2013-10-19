@@ -1,60 +1,66 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
-  <script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
-  <link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.css' rel='stylesheet' />
-  <script src='lodash.min.js'></script>
-  <script src='jquery.js'></script>
-  <!--[if lte IE 8]>
+  <head>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+    <script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
+    <link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.css' rel='stylesheet' />
+    <script src='lodash.min.js'></script>
+    <script src='jquery.js'></script>
+    <script src='moment.min.js'></script>
+    <!--[if lte IE 8]>
     <link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.ie.css' rel='stylesheet' >
-  <![endif]-->
-  <style>
-    body { margin:0; padding:0; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
-  </style>
-</head>
-<body>
-  <div>
-    <select>
-      <option value="16">16</option>
-    </select>
-
-  </div>
-<div id='map'></div>
-<script type='text/javascript'>
-var map = L.mapbox.map('map', 'derektingle.map-07s27o18');
-
-$(function() {
-  var addVenue = function(venue) {
-    L.mapbox.markerLayer({
-      // this feature is in the GeoJSON format: see geojson.org
-      // for the full specification
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        // coordinates here are in longitude, latitude order because
-        // x, y is the standard for GeoJSON and many formats
-        coordinates: [venue.lng, venue.lat]
-      },
-      properties: {
-        title: venue.name,
-        description: venue.name,
-        // one can customize markers by adding simplestyle properties
-        // http://mapbox.com/developers/simplestyle/
-        'marker-size': 'medium',
-        'marker-color': '#f0a'
+    <![endif]-->
+    <style>
+      body { margin:0; padding:0; }
+      #map { position:absolute; top:25px; bottom:0; width:100%; }
+      .leaflet-popup-content, .venueTable {
+        max-height: 350px;
+        overflow: scroll;
       }
-    }).addTo(map);
-  };
+    </style>
+  </head>
+  <body>
+    <div id='filterBar'>
 
-  $.get('/shows', function(data) {
-    _.forEach(data.venues, function(venue) {
-      addVenue(venue);
-    });
-  });
-});
+      Genre:
+      <select id='genreFilter'>
+        <option value="alternative">alternative</option>
+        <option value="blues">blues</option>
+        <option value="children's">children's</option>
+        <option value="classical">classical</option>
+        <option value="country & folk">country & folk</option>
+        <option value="dance & house">dance & house</option>
+        <option value="easy listening">easy listening</option>
+        <option value="electronica">electronica</option>
+        <option value="holiday">holiday</option>
+        <option value="indie rock">indie rock</option>
+        <option value="jazz">jazz</option>
+        <option value="latin">latin</option>
+        <option value="metal">metal</option>
+        <option value="new age">new age</option>
+        <option value="other">other</option>
+        <option value="pop">pop</option>
+        <option value="punk">punk</option>
+        <option value="r&b">r&b</option>
+        <option value="rap">rap</option>
+        <option value="reggae">reggae</option>
+        <option value="religious">religious</option>
+        <option value="rock">rock</option>
+        <option value="soundtrack">soundtrack</option>
+        <option value="spoken & audio">spoken & audio</option>
+        <option value="traditional">traditional</option>
+      </select>
 
-</script>
-</body>
+      Date:
+      <select id='dateFilter'>
+        <option value="16">Wed, Oct 16</option>
+        <option value="17">Thu, Oct 17</option>
+        <option value="18">Fri, Oct 18</option>
+        <option value="19">Sat, Oct 19</option>
+      </select>
+
+    </div>
+    <div id='map'></div>
+    <script src='cmj.js' ></script>
+  </body>
 </html>
