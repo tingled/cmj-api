@@ -27,7 +27,6 @@ var map = L.mapbox.map('map', 'derektingle.map-07s27o18');
 
 $(function() {
   var addVenue = function(venue) {
-    alert(L);
     L.mapbox.markerLayer({
       // this feature is in the GeoJSON format: see geojson.org
       // for the full specification
@@ -50,7 +49,6 @@ $(function() {
   };
 
   $.get('/shows', function(data) {
-    console.log(data.venues);
     _.forEach(data.venues, function(venue) {
       addVenue(venue);
     });
