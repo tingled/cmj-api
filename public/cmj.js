@@ -68,7 +68,7 @@ $(function() {
     markerLayer.eachLayer(function(layer) {
       var html = "<div>";
       html = "<strong>" + layer.feature.properties.title + "</strong>";
-      var link = "<a class='venuePlaylist' target=_blank href='http://embed.spotify.com/?uri=spotify:trackset:name:" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
+      var link = "<a class='venuePlaylist' target=_blank href='http://embed.spotify.com/?uri=spotify:trackset:" + layer.feature.properties.title +":" + layer.feature.properties.tracks.join(',') + "'>Playlist</a>";
       html += link;
       html += layer.feature.properties.popup;
       html += "</div>";
